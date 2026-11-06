@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đấu Trường Tri Thức - Lịch Sử Tây Ninh</title>
+  <style>
+    :root {
+      --primary: #c0392b;
+      --secondary: #f39c12;
+      --dark: #2c3e50;
+      --light: #ecf0f1;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f7f6;
+      color: #333;
+    }
+    header {
+      background-color: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      background: var(--dark);
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    nav button:hover, nav button.active {
+      background: var(--secondary);
+    }
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .section { display: none; }
+    .section.active { display: block; }
+    
+    /* Form styles */
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, select, button.btn {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    button.btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button.btn:hover { background: #e74c3c; }
+
+    /* Quiz styles */
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 12px;
+      margin: 8px 0;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .option-btn:hover { border-color: var(--secondary); background: #fffdf5; }
+    .option-btn.selected { border-color: var(--primary); background: #fadbd8; }
+    
+    .timer {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--primary);
+      text-align: right;
+    }
+    
+    /* Admin/MC Card */
+    .card {
+      border: 1px solid #e0e0e0;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      background: #fafafa;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>ĐẤU TRƯỜNG TRI THỨC - LỊCH SỬ TÂY NINH</h1>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" onclick="switchTab('login-tab')">Đăng Nhập Thí Sinh</button>
+    <button class="nav-btn" onclick="switchTab('quiz-tab')">Giao Diện Thi</button>
+    <button class="nav-btn" onclick="switchTab('mc-tab')">Điều Khiển MC</button>
+    <button class="nav-btn" onclick="switchTab('admin-tab')">Quản Trị Admin</button>
+  </nav>
+
+  <div class="container">
+    
+    <!-- 1. GIAO DIỆN ĐĂNG NHẬP THÍ SINH -->
+    <div id="login-tab" class="section active">
+      <h2>Đăng Nhập Thí Sinh</h2>
+      <div class="form-group">
+        <label>Họ và Tên:</label>
+        <input type="text" id="student-name" placeholder="Nhập họ tên thí sinh...">
+      </div>
+      <div class="form-group">
+        <label>Chọn Vòng Thi:</label>
+        <select id="round-select">
+          <option value="1">Vòng 1: Khởi Động (Lịch sử & Căn cứ Cách mạng)</option>
+          <option value="2">Vòng 2: Vượt Chướng Vấn Đề (Danh nhân & Địa danh)</option>
+          <option value="3">Vòng 3: Tăng Tốc (Văn hóa & Di tích Tây Ninh)</option>
+          <option value="4">Vòng 4: Về Đích (Tổng hợp Lịch sử Kháng chiến)</option>
+        </select>
+      </div>
+      <button class="btn" onclick="startQuiz()">Vào Thi</button>
+    </div>
+
+    <!-- 2. GIAO DIỆN THI TRẮC NGHIỆM -->
+    <div id="quiz-tab" class="section">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 id="quiz-user-info">Thí sinh: Chưa đăng nhập</h3>
+        <div class="timer" id="timer">Thời gian: 30s</div>
+      </div>
+      <hr>
+      <div id="quiz-box">
+        <h3 id="question-text">Câu hỏi sẽ hiển thị ở đây</h3>
+        <div id="options-container"></div>
+        <button class="btn" style="width: auto; float: right;" onclick="nextQuestion()">Câu tiếp theo</button>
+      </div>
+    </div>
+
+    <!-- 3. GIAO DIỆN ĐIỀU KHIỂN CỦA MC -->
+    <div id="mc-tab" class="section">
+      <h2>Màn Hình Điều Khiển GameShow (MC)</h2>
+      <div class="card">
+        <h3>Điều Khiển Tiến Trình</h3>
+        <p>Vòng thi hiện tại: <strong id="mc-current-round">Vòng 1</strong></p>
+        <button class="btn" onclick="alert('Đã mở thời gian làm bài cho tất cả thí sinh!')">Bắt đầu tính giờ</button>
+        <button class="btn" style="background:#7f8c8d;" onclick="alert('Tạm dừng vòng thi!')">Tạm dừng</button>
+      </div>
+      <div class="card">
+        <h3>Đáp Án Đúng & Thống Kê</h3>
+        <p id="mc-question-info">Chọn câu hỏi để xem đáp án chuẩn phục vụ dẫn chương trình.</p>
+      </div>
+    </div>
+
+    <!-- 4. GIAO DIỆN QUẢN TRỊ ADMIN -->
+    <div id="admin-tab" class="section">
+      <h2>Hệ Thống Quản Trị (Admin)</h2>
+      <div class="card">
+        <h3>Thêm/Chỉnh Sửa Câu Hỏi Lịch Sử Tây Ninh</h3>
+        <div class="form-group">
+          <label>Vòng thi:</label>
+          <select id="admin-round">
+            <option value="1">Vòng 1</option>
+            <option value="2">Vòng 2</option>
+            <option value="3">Vòng 3</option>
+            <option value="4">Vòng 4</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nội dung câu hỏi:</label>
+          <input type="text" placeholder="Nhập câu hỏi...">
+        </div>
+        <button class="btn" onclick="alert('Cập nhật câu hỏi thành công!')">Lưu Câu Hỏi</button>
+      </div>
+      <div class="card">
+        <h3>Bảng Xếp Hạng Kết Quả</h3>
+        <ul id="leaderboard">
+          <li>Nguyễn Văn A - Vòng 1: 100 điểm (2 phút)</li>
+          <li>Lê Thị B - Vòng 1: 90 điểm (2.5 phút)</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Dữ liệu mẫu 4 vòng thi (Mỗi vòng đại diện các câu hỏi Lịch sử Tây Ninh)
+    const quizData = {
+      1: [
+        { q: "Căn cứ Trung ương Cục miền Nam thời kỳ kháng chiến chống Mỹ đặt tại huyện nào của Tây Ninh?", a: ["Tân Biên", "Tân Châu", "Châu Thành", "Bến Cầu"], c: 0 },
+        { q: "Núi Bà Đen Tây Ninh còn có tên gọi dân gian nào khác?", a: ["Núi Phụng", "Núi Điện Bà", "Nối Vân Sơn", "Núi Một"], c: 1 },
+        { q: "Tòa thánh Tây Ninh là trung tâm của tôn giáo nào?", a: ["Phật giáo", "Công giáo", "Đạo Cao Đài", "Hòa Hảo"], c: 2 },
+        { q: "Chiến thắng Đường 14 - Phước Long và đợt tiến công Tây Ninh diễn ra vào năm nào?", a: ["1974-1975", "1968", "1972", "1954"], c: 0 }
+      ],
+      2: [
+        { q: "Anh hùng lực lượng vũ trang nhân dân nào gắn liền với địa danh Tây Ninh?", a: ["Nữ tướng Nguyễn Thị Định", "Bà Định", "Nguyễn Văn Trỗi", "Võ Thị Sáu"], c: 0 },
+        { q: "Địa danh 'Trảng Bàng' nổi tiếng với món ăn đặc sản lịch sử nào?", a: ["Bánh canh & Bánh tráng phơi sương", "Muối tôm", "Bánh xèo", "Bò tơ"], c: 0 }
+      ],
+      3: [
+        { q: "Di tích lịch sử Căn cứ Miền Đông Nam Bộ thuộc tỉnh nào?", a: ["Tây Ninh", "Bình Dương", "Đồng Nai", "Bình Phước"], c: 0 }
+      ],
+      4: [
+        { q: "Tây Ninh hoàn toàn giải phóng vào ngày tháng năm nào?", a: ["30/04/1975", "01/05/1975", "29/04/1975", "02/05/1975"], c: 0 }
+      ]
+    };
+
+    let currentRound = 1;
+    let currentQIdx = 0;
+    let timerInterval;
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function startQuiz() {
+      const name = document.getElementById('student-name').value;
+      if (!name) { alert('Vui lòng nhập tên thí sinh!'); return; }
+      currentRound = document.getElementById('round-select').value;
+      currentQIdx = 0;
+      document.getElementById('quiz-user-info').innerText = `Thí sinh: ${name} (Vòng ${currentRound})`;
+      switchTab('quiz-tab');
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const list = quizData[currentRound] || quizData[1];
+      if (currentQIdx >= list.length) {
+        alert('Chúc mừng bạn đã hoàn thành vòng thi!');
+        switchTab('login-tab');
+        return;
+      }
+      const item = list[currentQIdx];
+      document.getElementById('question-text').innerText = `Câu ${currentQIdx + 1}:${item.q}`;
+      const container = document.getElementById('options-container');
+      container.innerHTML = '';
+      item.a.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = `${String.fromCharCode(65 + idx)}.${opt}`;
+        btn.onclick = () => {
+          document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+        };
+        container.appendChild(btn);
+      });
+      resetTimer();
+    }
+
+    function nextQuestion() {
+      currentQIdx++;
+      loadQuestion();
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      let timeLeft = 30;
+      document.getElementById('timer').innerText = `Thời gian: ${timeLeft}s`;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').innerText = `Thời gian: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          nextQuestion();
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+  </html>
+            
